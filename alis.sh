@@ -345,7 +345,7 @@ function partition() {
             #PARTITION_BOOT_NUMBER=1
             DEVICE_ROOT="${DEVICE}p2"
         fi
-        
+
         if [ "$DEVICE_MMC" == "true" ]; then
             PARTITION_BOOT="${DEVICE}p1"
             PARTITION_ROOT="${DEVICE}p2"
@@ -376,7 +376,7 @@ function partition() {
             #PARTITION_BOOT_NUMBER=2
             DEVICE_ROOT="${DEVICE}p3"
         fi
-        
+
         if [ "$DEVICE_MMC" == "true" ]; then
             PARTITION_BIOS="${DEVICE}p1"
             PARTITION_BOOT="${DEVICE}p2"
@@ -1006,10 +1006,10 @@ function packages_aur() {
         arch-chroot /mnt sed -i 's/%wheel ALL=(ALL) ALL/%wheel ALL=(ALL) NOPASSWD: ALL/' /etc/sudoers
         case "$AUR" in
             "aurman" )
-                arch-chroot /mnt bash -c "echo -e \"$USER_PASSWORD\n$USER_PASSWORD\n$USER_PASSWORD\n$USER_PASSWORD\n\" | su $USER_NAME -c \"cd /home/$USER_NAME && git clone https://aur.archlinux.org/$AUR.git && gpg --recv-key 465022E743D71E39 && (cd $AUR && makepkg -si --noconfirm) && rm -rf $AUR\""
+                arch-chroot /mnt bash -c "su $USER_NAME -c \"cd /home/$USER_NAME && git clone https://aur.archlinux.org/$AUR.git && gpg --recv-key 465022E743D71E39 && (cd $AUR && makepkg -si --noconfirm) && rm -rf $AUR\""
                 ;;
             "yay" | *)
-                arch-chroot /mnt bash -c "echo -e \"$USER_PASSWORD\n$USER_PASSWORD\n$USER_PASSWORD\n$USER_PASSWORD\n\" | su $USER_NAME -c \"cd /home/$USER_NAME && git clone https://aur.archlinux.org/$AUR.git && (cd $AUR && makepkg -si --noconfirm) && rm -rf $AUR\""
+                arch-chroot /mnt bash -c "su $USER_NAME -c \"cd /home/$USER_NAME && git clone https://aur.archlinux.org/$AUR.git && (cd $AUR && makepkg -si --noconfirm) && rm -rf $AUR\""
                 ;;
         esac
         arch-chroot /mnt sed -i 's/%wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
@@ -1095,15 +1095,17 @@ function pacman_install() {
 
 function aur_install() {
     PACKAGES=$1
+    arch-chroot /mnt sed -i 's/%wheel ALL=(ALL) ALL/%wheel ALL=(ALL) NOPASSWD: ALL/' /etc/sudoers
     for VARIABLE in {1..5}
     do
-        arch-chroot /mnt bash -c "echo -e \"$USER_PASSWORD\n$USER_PASSWORD\n$USER_PASSWORD\n$USER_PASSWORD\n\" | su $USER_NAME -c \"$AUR -Syu --noconfirm --needed $PACKAGES\""
+        arch-chroot /mnt bash -c "su $USER_NAME -c \"$AUR -Syu --noconfirm --needed $PACKAGES\""
         if [ $? == 0 ]; then
             break
         else
             sleep 10
         fi
     done
+    arch-chroot /mnt sed -i 's/%wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) ALL/' /etc/sudoers
 }
 
 function print_step() {
